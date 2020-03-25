@@ -16,6 +16,7 @@ public class Main{
 		frame.setSize(1024,768);
 		applet.init();
 		applet.start();
+    applet.run();
 		frame.setVisible(true);
 	}
 }
