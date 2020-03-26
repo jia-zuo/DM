@@ -6,8 +6,11 @@ import java.awt.Font;
 import java.awt.Button;
 import java.awt.TextField;
 import java.awt.Label;
+import java.awt.Choice;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.BorderLayout;
@@ -25,7 +28,7 @@ public class DMain{
 /**
  * Created by jzuo on 2020/03/25
  */
-class DMFrame extends Frame implements ActionListener{
+class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
   private static final long serialVersionUID = 1L;
   int checkMethod;
   Panel p1;
@@ -33,12 +36,21 @@ class DMFrame extends Frame implements ActionListener{
   TextField deltaText;
   Label l1;
   Label l2;
+  Label l3;
+  Label zl;
   Button DM_button;
   Button SDM_button;
   Button GDM_button;
   Button ZDM_button;
   Font f1;
+  Choice choice1;
 
+  Thread O_sp;
+  Thread DM_sp;
+  Graphics Oshow;
+  Graphics DMshow;
+
+  int choice;
   int dt;
   int delta;
   int Maxdelta;
@@ -46,11 +58,22 @@ class DMFrame extends Frame implements ActionListener{
   int Maxtime;
   byte[] code;
   int[] a;
+  int wait;
+  int index;
+  double s;
+  double p;
+  double z;
 
   public DMFrame(){
     p1 = new Panel();
-    p1.setLayout(new GridLayout(1,8));
+    p1.setLayout(new GridLayout(1,11));
 
+    l3 = new Label("Z score:", 2);
+    l3.setForeground(Color.red);
+    p1.add(l3);
+    zl = new Label("      ", 0);
+    zl.setForeground(Color.black);
+    p1.add(zl);
     l1 = new Label("dt:", 2);
     l1.setForeground(Color.black);
     p1.add(l1);
@@ -78,6 +101,15 @@ class DMFrame extends Frame implements ActionListener{
     SDM_button.addActionListener(this);
     GDM_button.addActionListener(this);
     ZDM_button.addActionListener(this);
+
+    choice1 = new Choice();
+    choice1.add("change");
+    choice1.add("peace");
+    choice1.add("rapid");
+    choice1.add("sin");
+    choice1.add("quiet");
+    p1.add(choice1);
+    choice1.addItemListener(this);
   
     add(p1,BorderLayout.SOUTH);
 
@@ -89,6 +121,9 @@ class DMFrame extends Frame implements ActionListener{
     setVisible(true);
 
     checkMethod = 0;
+    Oshow = getGraphics();
+    DMshow = getGraphics();
+    choice = 1;
     dt = Integer.parseInt(dtText.getText());
     delta = Integer.parseInt(deltaText.getText());
     Maxtime = 830;
@@ -97,7 +132,10 @@ class DMFrame extends Frame implements ActionListener{
     Maxdelta = 2 * dt + delta;
     Mindelta = delta / 2;
     a[0] = 0;
-    
+    wait = 5;
+    index = 0;
+    s = p = z = 0.0D;
+
     this.addWindowListener(new WindowAdapter(){
       public void windowClosing(WindowEvent e){
         setVisible(false);
@@ -116,22 +154,22 @@ class DMFrame extends Frame implements ActionListener{
     Maxdelta = 2 * dt + delta;
     Mindelta = delta / 2;
     g.setColor(Color.white);
-    g.fillRect(0, 0, 1017, 650);
+    g.fillRect(0, 70, 1017, 650);
     g.setColor(Color.black);
     for (byte b = 0; b < 28; b++) {
-      g.drawString(String.valueOf(b * 30), 95 + b * 30, 620);
-      g.fillOval(100 + b * 30, 600, 2, 8);
-      g.drawString(String.valueOf(b * 18), 70, 605 - b * 18);
-      g.fillOval(92, 600 - b * 18, 8, 2);
+      g.drawString(String.valueOf(b * 30), 95 + b * 30, 605+70+15);
+      g.fillOval(100 + b * 30, 600+70, 2, 8);
+      g.drawString(String.valueOf(b * 18), 70, 605+70 - b * 18);
+      g.fillOval(92, 600+70 - b * 18, 8, 2);
     }
     g.setColor(Color.black);
-    g.drawLine(95, 605, 95, 30);
-    g.drawLine(95, 605, 950, 605);
+    g.drawLine(95, 605+70, 95, 30+70);
+    g.drawLine(95, 605+70, 950, 605+70);
     int[] arrayOfInt1 = { 95, 98, 92, 95 };
-    int[] arrayOfInt2 = { 18, 30, 30, 18 };
+    int[] arrayOfInt2 = { 18+70, 30+70, 30+70, 18+70 };
     g.fillPolygon(arrayOfInt1, arrayOfInt2, 4);
     int[] arrayOfInt3 = { 962, 950, 950, 962 };
-    int[] arrayOfInt4 = { 605, 608, 602, 605 };
+    int[] arrayOfInt4 = { 605+70, 608+70, 602+70, 605+70 };
     g.fillPolygon(arrayOfInt3, arrayOfInt4, 4);
   }
 
@@ -139,24 +177,325 @@ class DMFrame extends Frame implements ActionListener{
     if (checkMethod == 0) {
       // repaint();
       if (e.getSource() == this.DM_button) {
-        //start();
-        //this.checkMethod = 1;
-        System.out.println("DM");
+        start();
+        this.checkMethod = 1;
       } else if (e.getSource() == this.SDM_button) {
-        //start();
-        //this.checkMethod = 2;
-        System.out.println("SDM");
+        start();
+        this.checkMethod = 2;
       } else if (e.getSource() == this.GDM_button) {
-        //start();
-        //this.checkMethod = 3;
-        System.out.println("GDM");
+        start();
+        this.checkMethod = 3;
       } else if (e.getSource() == this.ZDM_button) {
-        //start();
-        //this.checkMethod = 5;
-        System.out.println("ZDM");
+        start();
+        this.checkMethod = 5;
       } else {
         checkMethod = 0;
       }
     }
   }
+
+  public void itemStateChanged(ItemEvent paramItemEvent) {
+    if (paramItemEvent.getItemSelectable() == choice1 && checkMethod == 0){
+      if (this.choice1.getSelectedIndex() == 0) {
+        choice = 1;
+      } else if (this.choice1.getSelectedIndex() == 1) {
+        choice = 2;
+      } else if (this.choice1.getSelectedIndex() == 2) {
+        choice = 3;
+      } else if (this.choice1.getSelectedIndex() == 3) {
+        choice = 4;
+      } else {
+        choice = 5;
+      }
+    }
+  }
+  public void start() {
+    s = p = z = 0.0D;
+    index = 0;
+    checkMethod = 0;
+    delta = Integer.parseInt(deltaText.getText());
+    dt = Integer.parseInt(dtText.getText());
+    O_sp = new Thread(this);
+    DM_sp = new Thread(this);
+    O_sp.start();
+  }
+
+    public void run() {
+        while (this.checkMethod != 0) {
+            if (Thread.currentThread() == this.O_sp) {
+                this.DM_sp.start();
+                this.Oshow.setColor(Color.white);
+                this.Oshow.fillRect(100, 50, 820, 550);
+                int i = -getOa(0, this.choice) + 599;
+                for (int b = 0; b < this.Maxtime && this.checkMethod != 0; b++) {
+                    int j = -getOa(b, this.choice) + 599;
+                    this.Oshow.setColor(Color.black);
+                    this.Oshow.drawLine(b + 99, i, b + 100, j);
+                    this.Oshow.fillOval(b + 100, j, 2, 2);
+                    i = j;
+                    try {
+                        // this.O_sp.sleep(this.wait);
+                        Thread.sleep(this.wait);
+                    } catch (InterruptedException interruptedException) {
+                    }
+                }
+                this.O_sp = null;
+                continue;
+            }
+            if (Thread.currentThread() == this.DM_sp) {
+                int i = 599;
+                int j;
+                if (checkMethod == 1) {
+                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                        int m = getOa(j, this.choice);
+                        int n = getDMa(m, j);
+                        int k = i;
+                        i = -n + 599;
+                        this.DMshow.setColor(Color.blue);
+                        this.DMshow.drawLine(j + 100, k, j + 100, i);
+                        this.DMshow.fillOval(j + 100, i, 3, 3);
+                        this.DMshow.setFont(this.f1);
+                        this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
+                        this.s++;
+                        this.p += (m > n) ? (m - n) : (n - m);
+                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
+                        try {
+                            // this.O_sp.sleep(this.dt * this.wait);
+                            Thread.sleep((this.dt * this.wait));
+                        } catch (InterruptedException interruptedException) {
+                        }
+                    }
+                    this.p /= this.s;
+                    this.zl.setText(String.valueOf(this.s + this.p));
+                    this.DM_sp = null;
+                    this.checkMethod = 0;
+                    this.index = 0;
+                    this.s = this.p = this.z = 0.0D;
+                } else if (checkMethod == 2) {
+                    i = 599;
+                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                        int m = getOa(j, this.choice);
+                        int n = getSDMa(m, j);
+                        int k = i;
+                        i = -n + 599;
+                        this.deltaText.setText(String.valueOf(this.delta));
+                        this.DMshow.setColor(Color.blue);
+                        this.DMshow.drawLine(j + 100, k, j + 100, i);
+                        this.DMshow.fillOval(j + 100, i, 3, 3);
+                        this.DMshow.setFont(this.f1);
+                        this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
+                        this.s++;
+                        this.p += (m > n) ? (m - n) : (n - m);
+                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
+                        try {
+                            // this.O_sp.sleep(this.dt * this.wait);
+                            Thread.sleep((this.dt * this.wait));
+                        } catch (InterruptedException interruptedException) {
+                        }
+                    }
+                    this.p /= this.s;
+                    this.zl.setText(String.valueOf(this.s + this.p));
+                    this.DM_sp = null;
+                    this.checkMethod = 0;
+                    this.index = 0;
+                    this.s = this.p = this.z = 0.0D;
+                } else if (checkMethod == 3) {
+                    i = 599;
+                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                        int m = getOa(j, this.choice);
+                        int n = getGDMa(m, j);
+                        int k = i;
+                        i = -n + 599;
+                        this.deltaText.setText(String.valueOf(this.delta));
+                        this.DMshow.setColor(Color.blue);
+                        this.DMshow.drawLine(j + 100, k, j + 100, i);
+                        this.DMshow.fillOval(j + 100, i, 3, 3);
+                        this.DMshow.setFont(this.f1);
+                        this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
+                        this.s++;
+                        this.p += (m > n) ? (m - n) : (n - m);
+                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
+                        try {
+                            // this.O_sp.sleep(this.dt * this.wait);
+                            Thread.sleep((this.dt * this.wait));
+                        } catch (InterruptedException interruptedException) {
+                        }
+                    }
+                    this.p /= this.s;
+                    this.zl.setText(String.valueOf(this.s + this.p));
+                    this.DM_sp = null;
+                    this.checkMethod = 0;
+                    this.index = 0;
+                    this.s = this.p = this.z = 0.0D;
+                } else if (checkMethod == 5) {
+                    i = 599;
+                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                        int m = getOa(j, this.choice);
+                        int n = getZDMa(m, j);
+                        int k = i;
+                        i = -n + 599;
+                        this.deltaText.setText(String.valueOf(this.delta));
+                        this.dtText.setText(String.valueOf(this.dt));
+                        this.DMshow.setColor(Color.red);
+                        this.DMshow.drawLine(j + 100, k, j + 100, i);
+                        this.DMshow.fillOval(j + 100, i, 3, 3);
+                        this.f1 = new Font("Helvetica", 1, 10 + this.dt / 3);
+                        this.DMshow.setFont(this.f1);
+                        this.DMshow.drawString(String.valueOf(this.code[this.index - 1]), j + 98, 65);
+                        this.s++;
+                        this.p += (m > n) ? (m - n) : (n - m);
+                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
+                        try {
+                            // this.O_sp.sleep(this.dt * this.wait);
+                            Thread.sleep((this.dt * this.wait));
+                        } catch (InterruptedException interruptedException) {
+                        }
+                    }
+                    this.p /= this.s;
+                    this.zl.setText(String.valueOf(this.s + this.p));
+                    this.DM_sp = null;
+                    this.checkMethod = 0;
+                    this.index = 0;
+                    this.s = this.p = this.z = 0.0D;
+                } else {
+                    this.DM_sp = null;
+                    this.checkMethod = 0;
+                }
+            }
+        }
+    }
+
+    public void stop() {
+        this.O_sp = null;
+        this.DM_sp = null;
+        this.checkMethod = 0;
+        this.Oshow.clearRect(0, 0, 910, 650);
+        this.DMshow.clearRect(0, 0, 910, 650);
+    }
+
+    int getOa(int paramInt1, int paramInt2) {
+        switch (paramInt2) {
+            case 1:
+                if (paramInt1 < 200)
+                    return 2 * paramInt1;
+                if (paramInt1 < 300)
+                    return -2 * paramInt1 + 800;
+                if (paramInt1 < 600)
+                    return 200;
+                return (int) (2.5D * paramInt1) - 1300;
+            case 2:
+                if (paramInt1 < 100)
+                    return paramInt1 * paramInt1 / 500 + paramInt1 / 2 + 100;
+                if (paramInt1 < 250)
+                    return -2 * paramInt1 * paramInt1 / 500 + 2 * paramInt1 + 10;
+                if (paramInt1 < 300)
+                    return -2 * paramInt1 + 760;
+                if (paramInt1 < 400)
+                    return paramInt1 * paramInt1 / 500 - paramInt1 + 280;
+                if (paramInt1 < 480)
+                    return -paramInt1 + 600;
+                if (paramInt1 < 600)
+                    return paramInt1 * paramInt1 / 600 - 2 * paramInt1 + 696;
+                return 96;
+            case 3:
+                return (int) ((Math.cos((paramInt1 / 5)) + Math.sin((paramInt1 / 7)) + 2.0D) * (getSize()).height
+                        / 5.0D);
+            case 4:
+                return (int) (Math.sin(paramInt1 / 60.0D) * 200.0D + 200.0D);
+        }
+        return 5;
+    }
+
+    int getDMa(int paramInt1, int paramInt2) {
+        if (paramInt1 >= this.a[paramInt2 / this.dt]) {
+            this.code[paramInt2 / this.dt] = 1;
+            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] + this.delta;
+        } else {
+            this.code[paramInt2 / this.dt] = 0;
+            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] - this.delta;
+        }
+        return this.a[paramInt2 / this.dt];
+    }
+
+    int getSDMa(int paramInt1, int paramInt2) {
+        if (paramInt1 >= this.a[paramInt2 / this.dt]) {
+            this.code[paramInt2 / this.dt] = 1;
+        } else {
+            this.code[paramInt2 / this.dt] = 0;
+        }
+        if (paramInt2 / this.dt >= 1 && this.code[paramInt2 / this.dt] == this.code[paramInt2 / this.dt - 1]) {
+            this.delta += (int) (0.5D * (this.delta + 2));
+        } else if (paramInt2 / this.dt >= 1) {
+            this.delta -= (int) (0.5D * this.delta);
+        } else {
+            // this.delta = this.delta;
+        }
+        if (this.code[paramInt2 / this.dt] == 1) {
+            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] + this.delta;
+        } else {
+            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] - this.delta;
+        }
+        return this.a[paramInt2 / this.dt];
+    }
+
+    int getGDMa(int paramInt1, int paramInt2) {
+        if (paramInt1 >= this.a[paramInt2 / this.dt]) {
+            this.code[paramInt2 / this.dt] = 1;
+        } else {
+            this.code[paramInt2 / this.dt] = 0;
+        }
+        if (paramInt2 / this.dt >= 2 && this.code[paramInt2 / this.dt] == this.code[paramInt2 / this.dt - 1]
+                && this.code[paramInt2 / this.dt - 1] == this.code[paramInt2 / this.dt - 2]) {
+            this.delta = this.Maxdelta;
+        } else if (paramInt2 / this.dt >= 2) {
+            this.delta = this.Mindelta;
+        } else {
+            // this.delta = this.delta;
+        }
+        if (this.code[paramInt2 / this.dt] == 1) {
+            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] + this.delta;
+        } else {
+            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] - this.delta;
+        }
+        return this.a[paramInt2 / this.dt];
+    }
+
+    int getZDMa(int paramInt1, int paramInt2) {
+        if (paramInt1 >= this.a[this.index]) {
+            this.code[this.index] = 1;
+        } else {
+            this.code[this.index] = 0;
+        }
+        if (this.index >= 2 && this.code[this.index] == this.code[this.index - 1]
+                && this.code[this.index - 1] == this.code[this.index - 2]) {
+            this.delta += (int) (0.5D * (this.delta + 2));
+            if (this.dt > 64) {
+                this.dt /= 10;
+            } else if (this.dt > 16) {
+                this.dt = this.dt / 2 - this.dt / 4;
+            } else {
+                this.dt -= this.dt / 2;
+            }
+        } else if (this.index >= 2) {
+            this.delta -= (int) (0.5D * this.delta) - 1;
+            if (this.dt <= 4) {
+                this.dt *= 2;
+            } else if (this.dt <= 16) {
+                this.dt += this.dt / 5;
+            } else if (this.dt <= 64) {
+                this.dt += this.dt / 10;
+            } else {
+                this.dt += 10;
+            }
+        } else {
+            // this.delta = this.delta;
+        }
+        if (this.code[this.index] == 1) {
+            this.a[this.index + 1] = this.a[this.index] + this.delta;
+        } else {
+            this.a[this.index + 1] = this.a[this.index] - this.delta;
+        }
+        this.index++;
+        return this.a[this.index - 1];
+    }
 }
