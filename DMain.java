@@ -71,7 +71,7 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     l3 = new Label("Z score:", 2);
     l3.setForeground(Color.red);
     p1.add(l3);
-    zl = new Label("      ", 0);
+    zl = new Label("             ", 0);
     zl.setForeground(Color.black);
     p1.add(zl);
     l1 = new Label("dt:", 2);
@@ -132,7 +132,7 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     Maxdelta = 2 * dt + delta;
     Mindelta = delta / 2;
     a[0] = 0;
-    wait = 5;
+    wait = 20;
     index = 0;
     s = p = z = 0.0D;
 
@@ -154,7 +154,8 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     Maxdelta = 2 * dt + delta;
     Mindelta = delta / 2;
     g.setColor(Color.white);
-    g.fillRect(0, 70, 1017, 650);
+    // g.fillRect(0, 70, 1017, 650);
+    g.fillRect(0, 0, 1017, 650+70);
     g.setColor(Color.black);
     for (byte b = 0; b < 28; b++) {
       g.drawString(String.valueOf(b * 30), 95 + b * 30, 605+70+15);
@@ -175,7 +176,7 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
 
   public void actionPerformed(ActionEvent e) {
     if (checkMethod == 0) {
-      // repaint();
+      repaint();
       if (e.getSource() == this.DM_button) {
         start();
         this.checkMethod = 1;
@@ -220,150 +221,151 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     O_sp.start();
   }
 
-    public void run() {
-        while (this.checkMethod != 0) {
-            if (Thread.currentThread() == this.O_sp) {
-                this.DM_sp.start();
-                this.Oshow.setColor(Color.white);
-                this.Oshow.fillRect(100, 50, 820, 550);
-                int i = -getOa(0, this.choice) + 599;
-                for (int b = 0; b < this.Maxtime && this.checkMethod != 0; b++) {
-                    int j = -getOa(b, this.choice) + 599;
-                    this.Oshow.setColor(Color.black);
-                    this.Oshow.drawLine(b + 99, i, b + 100, j);
-                    this.Oshow.fillOval(b + 100, j, 2, 2);
-                    i = j;
+  public void run() {
+    while (checkMethod != 0) {
+      if (Thread.currentThread() == O_sp) {
+        DM_sp.start();
+        Oshow.setColor(Color.white);
+        //Oshow.fillRect(100, 50+70, 820+30, 550);
+        Oshow.fillRect(100, 0, 820+30, 550+120);
+        int i = -getOa(0, choice) + 599 + 70;
+        for (int b = 0; b < Maxtime && checkMethod != 0; b++) {
+          int j = -getOa(b, choice) + 599 + 70;
+          Oshow.setColor(Color.black);
+          Oshow.drawLine(b + 99, i, b + 100, j);
+          Oshow.fillOval(b + 100, j, 2, 2);
+          i = j;
+          try {
+              O_sp.sleep(wait);
+              // Thread.sleep(this.wait);
+          } catch (InterruptedException interruptedException) {
+          }
+        }
+        O_sp = null;
+        continue;
+      }
+        if (Thread.currentThread() == this.DM_sp) {
+            int i = 599 + 70;
+            int j;
+            if (checkMethod == 1) {
+                for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                    int m = getOa(j, this.choice);
+                    int n = getDMa(m, j);
+                    int k = i;
+                    i = -n + 599 + 70;
+                    this.DMshow.setColor(Color.blue);
+                    this.DMshow.drawLine(j + 100, k, j + 100, i);
+                    this.DMshow.fillOval(j + 100, i, 3, 3);
+                    this.DMshow.setFont(this.f1);
+                    this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
+                    this.s++;
+                    this.p += (m > n) ? (m - n) : (n - m);
+                    this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
                     try {
-                        // this.O_sp.sleep(this.wait);
-                        Thread.sleep(this.wait);
+                        O_sp.sleep(dt * wait);
+                        // Thread.sleep((this.dt * this.wait));
                     } catch (InterruptedException interruptedException) {
                     }
                 }
-                this.O_sp = null;
-                continue;
-            }
-            if (Thread.currentThread() == this.DM_sp) {
-                int i = 599;
-                int j;
-                if (checkMethod == 1) {
-                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
-                        int m = getOa(j, this.choice);
-                        int n = getDMa(m, j);
-                        int k = i;
-                        i = -n + 599;
-                        this.DMshow.setColor(Color.blue);
-                        this.DMshow.drawLine(j + 100, k, j + 100, i);
-                        this.DMshow.fillOval(j + 100, i, 3, 3);
-                        this.DMshow.setFont(this.f1);
-                        this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
-                        this.s++;
-                        this.p += (m > n) ? (m - n) : (n - m);
-                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
-                        try {
-                            // this.O_sp.sleep(this.dt * this.wait);
-                            Thread.sleep((this.dt * this.wait));
-                        } catch (InterruptedException interruptedException) {
-                        }
+                this.p /= this.s;
+                this.zl.setText(String.valueOf(this.s + this.p));
+                this.DM_sp = null;
+                this.checkMethod = 0;
+                this.index = 0;
+                this.s = this.p = this.z = 0.0D;
+            } else if (checkMethod == 2) {
+                i = 599 + 70;
+                for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                    int m = getOa(j, this.choice);
+                    int n = getSDMa(m, j);
+                    int k = i;
+                    i = -n + 599 + 70;
+                    this.deltaText.setText(String.valueOf(this.delta));
+                    this.DMshow.setColor(Color.blue);
+                    this.DMshow.drawLine(j + 100, k, j + 100, i);
+                    this.DMshow.fillOval(j + 100, i, 3, 3);
+                    this.DMshow.setFont(this.f1);
+                    this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
+                    this.s++;
+                    this.p += (m > n) ? (m - n) : (n - m);
+                    this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
+                    try {
+                        O_sp.sleep(dt * wait);
+                        // Thread.sleep((this.dt * this.wait));
+                    } catch (InterruptedException interruptedException) {
                     }
-                    this.p /= this.s;
-                    this.zl.setText(String.valueOf(this.s + this.p));
-                    this.DM_sp = null;
-                    this.checkMethod = 0;
-                    this.index = 0;
-                    this.s = this.p = this.z = 0.0D;
-                } else if (checkMethod == 2) {
-                    i = 599;
-                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
-                        int m = getOa(j, this.choice);
-                        int n = getSDMa(m, j);
-                        int k = i;
-                        i = -n + 599;
-                        this.deltaText.setText(String.valueOf(this.delta));
-                        this.DMshow.setColor(Color.blue);
-                        this.DMshow.drawLine(j + 100, k, j + 100, i);
-                        this.DMshow.fillOval(j + 100, i, 3, 3);
-                        this.DMshow.setFont(this.f1);
-                        this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
-                        this.s++;
-                        this.p += (m > n) ? (m - n) : (n - m);
-                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
-                        try {
-                            // this.O_sp.sleep(this.dt * this.wait);
-                            Thread.sleep((this.dt * this.wait));
-                        } catch (InterruptedException interruptedException) {
-                        }
-                    }
-                    this.p /= this.s;
-                    this.zl.setText(String.valueOf(this.s + this.p));
-                    this.DM_sp = null;
-                    this.checkMethod = 0;
-                    this.index = 0;
-                    this.s = this.p = this.z = 0.0D;
-                } else if (checkMethod == 3) {
-                    i = 599;
-                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
-                        int m = getOa(j, this.choice);
-                        int n = getGDMa(m, j);
-                        int k = i;
-                        i = -n + 599;
-                        this.deltaText.setText(String.valueOf(this.delta));
-                        this.DMshow.setColor(Color.blue);
-                        this.DMshow.drawLine(j + 100, k, j + 100, i);
-                        this.DMshow.fillOval(j + 100, i, 3, 3);
-                        this.DMshow.setFont(this.f1);
-                        this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
-                        this.s++;
-                        this.p += (m > n) ? (m - n) : (n - m);
-                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
-                        try {
-                            // this.O_sp.sleep(this.dt * this.wait);
-                            Thread.sleep((this.dt * this.wait));
-                        } catch (InterruptedException interruptedException) {
-                        }
-                    }
-                    this.p /= this.s;
-                    this.zl.setText(String.valueOf(this.s + this.p));
-                    this.DM_sp = null;
-                    this.checkMethod = 0;
-                    this.index = 0;
-                    this.s = this.p = this.z = 0.0D;
-                } else if (checkMethod == 5) {
-                    i = 599;
-                    for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
-                        int m = getOa(j, this.choice);
-                        int n = getZDMa(m, j);
-                        int k = i;
-                        i = -n + 599;
-                        this.deltaText.setText(String.valueOf(this.delta));
-                        this.dtText.setText(String.valueOf(this.dt));
-                        this.DMshow.setColor(Color.red);
-                        this.DMshow.drawLine(j + 100, k, j + 100, i);
-                        this.DMshow.fillOval(j + 100, i, 3, 3);
-                        this.f1 = new Font("Helvetica", 1, 10 + this.dt / 3);
-                        this.DMshow.setFont(this.f1);
-                        this.DMshow.drawString(String.valueOf(this.code[this.index - 1]), j + 98, 65);
-                        this.s++;
-                        this.p += (m > n) ? (m - n) : (n - m);
-                        this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
-                        try {
-                            // this.O_sp.sleep(this.dt * this.wait);
-                            Thread.sleep((this.dt * this.wait));
-                        } catch (InterruptedException interruptedException) {
-                        }
-                    }
-                    this.p /= this.s;
-                    this.zl.setText(String.valueOf(this.s + this.p));
-                    this.DM_sp = null;
-                    this.checkMethod = 0;
-                    this.index = 0;
-                    this.s = this.p = this.z = 0.0D;
-                } else {
-                    this.DM_sp = null;
-                    this.checkMethod = 0;
                 }
+                this.p /= this.s;
+                this.zl.setText(String.valueOf(this.s + this.p));
+                this.DM_sp = null;
+                this.checkMethod = 0;
+                this.index = 0;
+                this.s = this.p = this.z = 0.0D;
+            } else if (checkMethod == 3) {
+                i = 599 + 70;
+                for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                    int m = getOa(j, this.choice);
+                    int n = getGDMa(m, j);
+                    int k = i;
+                    i = -n + 599 + 70;
+                    this.deltaText.setText(String.valueOf(this.delta));
+                    this.DMshow.setColor(Color.blue);
+                    this.DMshow.drawLine(j + 100, k, j + 100, i);
+                    this.DMshow.fillOval(j + 100, i, 3, 3);
+                    this.DMshow.setFont(this.f1);
+                    this.DMshow.drawString(String.valueOf(this.code[j / this.dt]), j + 98, 65);
+                    this.s++;
+                    this.p += (m > n) ? (m - n) : (n - m);
+                    this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
+                    try {
+                        O_sp.sleep(dt * wait);
+                        // Thread.sleep((this.dt * this.wait));
+                    } catch (InterruptedException interruptedException) {
+                    }
+                }
+                this.p /= this.s;
+                this.zl.setText(String.valueOf(this.s + this.p));
+                this.DM_sp = null;
+                this.checkMethod = 0;
+                this.index = 0;
+                this.s = this.p = this.z = 0.0D;
+            } else if (checkMethod == 5) {
+                i = 599 + 70;
+                for (j = 0; j < this.Maxtime && this.checkMethod != 0; j += this.dt) {
+                    int m = getOa(j, this.choice);
+                    int n = getZDMa(m, j);
+                    int k = i;
+                    i = -n + 599 + 70;
+                    this.deltaText.setText(String.valueOf(this.delta));
+                    this.dtText.setText(String.valueOf(this.dt));
+                    this.DMshow.setColor(Color.red);
+                    this.DMshow.drawLine(j + 100, k, j + 100, i);
+                    this.DMshow.fillOval(j + 100, i, 3, 3);
+                    this.f1 = new Font("Helvetica", 1, 10 + this.dt / 3);
+                    this.DMshow.setFont(this.f1);
+                    this.DMshow.drawString(String.valueOf(this.code[this.index - 1]), j + 98, 65);
+                    this.s++;
+                    this.p += (m > n) ? (m - n) : (n - m);
+                    this.DMshow.drawLine(j + 100, i, j + 100 + this.dt, i);
+                    try {
+                        O_sp.sleep(dt * wait);
+                        // Thread.sleep((this.dt * this.wait));
+                    } catch (InterruptedException interruptedException) {
+                    }
+                }
+                this.p /= this.s;
+                this.zl.setText(String.valueOf(this.s + this.p));
+                this.DM_sp = null;
+                this.checkMethod = 0;
+                this.index = 0;
+                this.s = this.p = this.z = 0.0D;
+            } else {
+                this.DM_sp = null;
+                this.checkMethod = 0;
             }
         }
     }
+  }
 
     public void stop() {
         this.O_sp = null;
