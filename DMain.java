@@ -68,10 +68,10 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     p1 = new Panel();
     p1.setLayout(new GridLayout(1,11));
 
-    l3 = new Label("Z score+:", 2);
+    l3 = new Label("Z score:", 2);
     l3.setForeground(Color.red);
     p1.add(l3);
-    zl = new Label("                  ", 0);
+    zl = new Label("                    ", 0);
     zl.setForeground(Color.black);
     p1.add(zl);
     l1 = new Label("dt:", 2);
@@ -361,53 +361,52 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
           index = 0;
           s = p = z = 0.0D;
         } else {
-            this.DM_sp = null;
-            this.checkMethod = 0;
+          DM_sp = null;
+          checkMethod = 0;
         }
       }
     }
   }
 
-    public void stop() {
-        this.O_sp = null;
-        this.DM_sp = null;
-        this.checkMethod = 0;
-        this.Oshow.clearRect(0, 0, 910, 650);
-        this.DMshow.clearRect(0, 0, 910, 650);
-    }
+  public void stop() {
+    O_sp = null;
+    DM_sp = null;
+    checkMethod = 0;
+    Oshow.clearRect(0, 0, 910, 650);
+    DMshow.clearRect(0, 0, 910, 650);
+  }
 
-    int getOa(int paramInt1, int paramInt2) {
-        switch (paramInt2) {
-            case 1:
-                if (paramInt1 < 200)
-                    return 2 * paramInt1;
-                if (paramInt1 < 300)
-                    return -2 * paramInt1 + 800;
-                if (paramInt1 < 600)
-                    return 200;
-                return (int) (2.5D * paramInt1) - 1300;
-            case 2:
-                if (paramInt1 < 100)
-                    return paramInt1 * paramInt1 / 500 + paramInt1 / 2 + 100;
-                if (paramInt1 < 250)
-                    return -2 * paramInt1 * paramInt1 / 500 + 2 * paramInt1 + 10;
-                if (paramInt1 < 300)
-                    return -2 * paramInt1 + 760;
-                if (paramInt1 < 400)
-                    return paramInt1 * paramInt1 / 500 - paramInt1 + 280;
-                if (paramInt1 < 480)
-                    return -paramInt1 + 600;
-                if (paramInt1 < 600)
-                    return paramInt1 * paramInt1 / 600 - 2 * paramInt1 + 696;
-                return 96;
-            case 3:
-                return (int) ((Math.cos((paramInt1 / 5)) + Math.sin((paramInt1 / 7)) + 2.0D) * (getSize()).height
-                        / 5.0D);
-            case 4:
-                return (int) (Math.sin(paramInt1 / 60.0D) * 200.0D + 200.0D);
-        }
-        return 5;
+  int getOa(int paramInt1, int paramInt2) {
+    switch (paramInt2) {
+      case 1:
+        if (paramInt1 < 200)
+          return 2 * paramInt1;
+        if (paramInt1 < 300)
+          return -2 * paramInt1 + 800;
+        if (paramInt1 < 600)
+          return 200;
+        return (int) (2.5D * paramInt1) - 1300;
+      case 2:
+        if (paramInt1 < 100)
+          return paramInt1 * paramInt1 / 500 + paramInt1 / 2 + 100;
+        if (paramInt1 < 250)
+          return -2 * paramInt1 * paramInt1 / 500 + 2 * paramInt1 + 10;
+        if (paramInt1 < 300)
+          return -2 * paramInt1 + 760;
+        if (paramInt1 < 400)
+          return paramInt1 * paramInt1 / 500 - paramInt1 + 280;
+        if (paramInt1 < 480)
+          return -paramInt1 + 600;
+        if (paramInt1 < 600)
+          return paramInt1 * paramInt1 / 600 - 2 * paramInt1 + 696;
+        return 96;
+      case 3:
+        return (int) ((Math.cos((paramInt1 / 5)) + Math.sin((paramInt1 / 7)) + 2.0D) * (getSize()).height / 5.0D);
+      case 4:
+        return (int) (Math.sin(paramInt1 / 60.0D) * 200.0D + 200.0D);
     }
+    return 5;
+  }
 
     int getDMa(int paramInt1, int paramInt2) {
         if (paramInt1 >= this.a[paramInt2 / this.dt]) {
