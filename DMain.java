@@ -68,7 +68,7 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     p1 = new Panel();
     p1.setLayout(new GridLayout(1,11));
 
-    l3 = new Label("Z score:", 2);
+    l3 = new Label("Z score+:", 2);
     l3.setForeground(Color.red);
     p1.add(l3);
     zl = new Label("                    ", 0);
@@ -408,16 +408,16 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     return 5;
   }
 
-    int getDMa(int paramInt1, int paramInt2) {
-        if (paramInt1 >= this.a[paramInt2 / this.dt]) {
-            this.code[paramInt2 / this.dt] = 1;
-            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] + this.delta;
-        } else {
-            this.code[paramInt2 / this.dt] = 0;
-            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] - this.delta;
-        }
-        return this.a[paramInt2 / this.dt];
+  int getDMa(int paramInt1, int paramInt2) {
+    if (paramInt1 >= a[paramInt2 / dt]) {
+      code[paramInt2 / dt] = 1;
+      a[paramInt2 / dt + 1] = a[paramInt2 / dt] + delta;
+    } else {
+      code[paramInt2 / dt] = 0;
+      a[paramInt2 / dt + 1] = a[paramInt2 / dt] - delta;
     }
+    return a[paramInt2 / dt];
+  }
 
     int getSDMa(int paramInt1, int paramInt2) {
         if (paramInt1 >= this.a[paramInt2 / this.dt]) {
