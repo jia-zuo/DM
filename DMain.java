@@ -68,7 +68,7 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     p1 = new Panel();
     p1.setLayout(new GridLayout(1,11));
 
-    l3 = new Label("Z score:", 2);
+    l3 = new Label("Z score+:", 2);
     l3.setForeground(Color.red);
     p1.add(l3);
     zl = new Label("                    ", 0);
@@ -440,27 +440,27 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     return a[paramInt2 / dt];
   }
 
-    int getGDMa(int paramInt1, int paramInt2) {
-        if (paramInt1 >= this.a[paramInt2 / this.dt]) {
-            this.code[paramInt2 / this.dt] = 1;
-        } else {
-            this.code[paramInt2 / this.dt] = 0;
-        }
-        if (paramInt2 / this.dt >= 2 && this.code[paramInt2 / this.dt] == this.code[paramInt2 / this.dt - 1]
-                && this.code[paramInt2 / this.dt - 1] == this.code[paramInt2 / this.dt - 2]) {
-            this.delta = this.Maxdelta;
-        } else if (paramInt2 / this.dt >= 2) {
-            this.delta = this.Mindelta;
-        } else {
-            // this.delta = this.delta;
-        }
-        if (this.code[paramInt2 / this.dt] == 1) {
-            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] + this.delta;
-        } else {
-            this.a[paramInt2 / this.dt + 1] = this.a[paramInt2 / this.dt] - this.delta;
-        }
-        return this.a[paramInt2 / this.dt];
+  int getGDMa(int paramInt1, int paramInt2) {
+    if (paramInt1 >= a[paramInt2 / dt]) {
+      code[paramInt2 / dt] = 1;
+    } else {
+      code[paramInt2 / dt] = 0;
     }
+    if (paramInt2 / dt >= 2 && code[paramInt2 / dt] == code[paramInt2 / dt - 1]
+        && code[paramInt2 / dt - 1] == code[paramInt2 / dt - 2]) {
+      delta = Maxdelta;
+    } else if (paramInt2 / dt >= 2) {
+      delta = Mindelta;
+    } else {
+      // delta = delta;
+    }
+    if (code[paramInt2 / dt] == 1) {
+      a[paramInt2 / dt + 1] = a[paramInt2 / dt] + delta;
+    } else {
+      a[paramInt2 / dt + 1] = a[paramInt2 / dt] - delta;
+    }
+    return a[paramInt2 / dt];
+  }
 
     int getZDMa(int paramInt1, int paramInt2) {
         if (paramInt1 >= this.a[this.index]) {
