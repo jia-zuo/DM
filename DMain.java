@@ -68,7 +68,7 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     p1 = new Panel();
     p1.setLayout(new GridLayout(1,11));
 
-    l3 = new Label("Z score+:", 2);
+    l3 = new Label("Z score:", 2);
     l3.setForeground(Color.red);
     p1.add(l3);
     zl = new Label("                    ", 0);
@@ -462,42 +462,42 @@ class DMFrame extends Frame implements ActionListener, Runnable, ItemListener {
     return a[paramInt2 / dt];
   }
 
-    int getZDMa(int paramInt1, int paramInt2) {
-        if (paramInt1 >= this.a[this.index]) {
-            this.code[this.index] = 1;
-        } else {
-            this.code[this.index] = 0;
-        }
-        if (this.index >= 2 && this.code[this.index] == this.code[this.index - 1]
-                && this.code[this.index - 1] == this.code[this.index - 2]) {
-            this.delta += (int) (0.5D * (this.delta + 2));
-            if (this.dt > 64) {
-                this.dt /= 10;
-            } else if (this.dt > 16) {
-                this.dt = this.dt / 2 - this.dt / 4;
-            } else {
-                this.dt -= this.dt / 2;
-            }
-        } else if (this.index >= 2) {
-            this.delta -= (int) (0.5D * this.delta) - 1;
-            if (this.dt <= 4) {
-                this.dt *= 2;
-            } else if (this.dt <= 16) {
-                this.dt += this.dt / 5;
-            } else if (this.dt <= 64) {
-                this.dt += this.dt / 10;
-            } else {
-                this.dt += 10;
-            }
-        } else {
-            // this.delta = this.delta;
-        }
-        if (this.code[this.index] == 1) {
-            this.a[this.index + 1] = this.a[this.index] + this.delta;
-        } else {
-            this.a[this.index + 1] = this.a[this.index] - this.delta;
-        }
-        this.index++;
-        return this.a[this.index - 1];
+  int getZDMa(int paramInt1, int paramInt2) {
+    if (paramInt1 >= a[index]) {
+      code[index] = 1;
+    } else {
+      code[index] = 0;
     }
+    if (index >= 2 && code[index] == code[index - 1]
+      && code[index - 1] == code[index - 2]) {
+      delta += (int) (0.5D * (delta + 2));
+      if (dt > 64) {
+        dt /= 10;
+      } else if (dt > 16) {
+        dt = dt / 2 - dt / 4;
+      } else {
+        dt -= dt / 2;
+      }
+    } else if (index >= 2) {
+      delta -= (int) (0.5D * delta) - 1;
+      if (dt <= 4) {
+        dt *= 2;
+      } else if (dt <= 16) {
+        dt += dt / 5;
+      } else if (dt <= 64) {
+        dt += dt / 10;
+      } else {
+        dt += 10;
+      }
+    } else {
+      // delta = delta;
+    }
+    if (code[index] == 1) {
+      a[index + 1] = a[index] + delta;
+    } else {
+      a[index + 1] = a[index] - delta;
+    }
+    index++;
+    return a[index - 1];
+  }
 }
