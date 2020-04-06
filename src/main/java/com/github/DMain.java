@@ -1,3 +1,5 @@
+package com.github;
+
 import java.awt.Frame;
 import java.awt.Panel;
 import java.awt.Color;

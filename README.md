@@ -8,11 +8,16 @@ Speech Coding, Delta Modulation, Backward adaptation, Heterogeneous Coding
 Based on prediction model¡¯s effectiveness to the marginal ability of Speech Coding,and the introduction of the basic adaptive algorithm and theory,discussions about the precision of prediction and the coding¡¯s simplification is combined to present an improved algorithm.It made the samples close in the expectable spot rapidly and stably.Both the analysis and the result of simulation make clear that,this new algorithm has resilience and the expand is large.If little amended,it will suit to the different change of signal.
 
 #### Installation
-1.  javac -d temp DMain.java
+1.  javac -d temp src/main/java/com/github/DMain.java
 2.  cd temp
 3.  jar cvfm ../DM.jar META-INF/MANIFEST.MF *
 4.  cd ..
 5.  java -jar DM.jar
+
+#### Maven
+1.  mvn clean compile
+2.  mvn package
+3.  java -jar target/DM-1.0.jar
 
 #### Instructions
 1.  bottom right, choose a sample,
