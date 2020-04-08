@@ -1,0 +1,2 @@
+download mysql-connector-java-5.1.47-bin.jar
+and copy mysql-connector-java-5.1.47-bin.jar to this dir

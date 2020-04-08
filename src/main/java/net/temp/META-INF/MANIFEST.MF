@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: ./ ../lib/FTdao.jar ../lib/mysql-connector-java-5.1.47-bin.jar
+Created-By: 10.0.1
+Main-Class: Test
