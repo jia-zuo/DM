@@ -1,0 +1,14 @@
+aptitude search mysqldb
+
+aptitude install python-mysqldb
+
+sudo mysql -uroot -p
+
+mysql> source /home/jzuo/Documents/DM/py/menu.sql
+
+grant all privileges on menu.fish to 'jzuo'@'%' identified by 'jzuo';
+flush privileges;
+
+exit;
+
+python /home/jzuo/Documents/DM/py/start001.py
